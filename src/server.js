@@ -10,6 +10,8 @@ const __filename = fileURLToPath(import.meta.url)
 //Get directory name from the file path
 const __dirname = dirname(__filename)
 
+//Middleware
+app.use(express.json())
 //tell express to provides all files from public folder as static file
 app.use(express.static(path.join(__dirname , '../public')))
 
