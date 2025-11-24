@@ -15,7 +15,7 @@
 <body>
     <section id="auth">
         <div>
-            <h2 className="sign-up-text">Login</h2>
+            <h2 class="sign-up-text">Login</h2>
             <p>Create an account!</p>
         </div>
 
@@ -251,7 +251,7 @@
     async function fetchTodos() {
         isLoading = true
         const response = await fetch(apiBase + 'todos', {
-            headers: { 'Authorization': token }
+            headers: { 'Authorization': `Bearer ${token}` }
         })
         const todosData = await response.json()
         todos = todosData
@@ -265,7 +265,7 @@
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': token
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ task: todos.find(val => val.id === index).task, completed: 1 })
         })
@@ -277,8 +277,8 @@
         await fetch(apiBase + 'todos' + '/' + index, {
             method: 'DELETE',
             headers: {
-                'Authorization': token
-            },
+                'Authorization': `Bearer ${token}`
+            }
         })
         fetchTodos()
     }
@@ -293,9 +293,9 @@
         await fetch(apiBase + 'todos', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token
-            },
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+             },
             body: JSON.stringify({ task })
         })
         todoInput.value = ''
