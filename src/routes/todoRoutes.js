@@ -1,57 +1,44 @@
 import express from 'express'
 import db from '../db.js'
-import authMiddleware from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
-// Protect all routes
-router.use(authMiddleware)
-
-// GET all todos for logged user
+// Get all todos for logged-in user
 router.get('/', (req, res) => {
     const getTodos = db.prepare('SELECT * FROM todos WHERE user_id = ?')
     const todos = getTodos.all(req.userId)
     res.json(todos)
 })
 
-// CREATE a new todo
+// Create a new todo
 router.post('/', (req, res) => {
     const { task } = req.body
+    const insertTodo = db.prepare(`INSERT INTO todos (user_id, task) VALUES (?, ?)`)
+    const result = insertTodo.run(req.userId, task)
 
-    const addTodo = db.prepare(`
-        INSERT INTO todos (user_id, task) VALUES (?, ?)
-    `)
-
-    const result = addTodo.run(req.userId, task)
-
-    res.status(201).json({ id: result.lastInsertRowid, task })
+    res.json({ id: result.lastInsertRowid, task, completed: 0 })
 })
 
-// UPDATE a todo
+// Update a todo
 router.put('/:id', (req, res) => {
-    const { task } = req.body
+    const { completed } = req.body
     const { id } = req.params
+    const { page } = req.query
 
-    const updateTodo = db.prepare(`
-        UPDATE todos SET task = ? WHERE id = ? AND user_id = ?
-    `)
+    const updatedTodo = db.prepare('UPDATE todos SET completed = ? WHERE id = ?')
+    updatedTodo.run(completed, id)
 
-    updateTodo.run(task, id, req.userId)
-
-    res.json({ message: "Todo updated" })
+    res.json({ message: "Todo completed" })
 })
 
-// DELETE a todo
+// Delete a todo
 router.delete('/:id', (req, res) => {
     const { id } = req.params
-
-    const deleteTodo = db.prepare(`
-        DELETE FROM todos WHERE id = ? AND user_id = ?
-    `)
-
-    deleteTodo.run(id, req.userId)
-
-    res.json({ message: "Todo deleted" })
+    const userId = req.userId
+    const deleteTodo = db.prepare(`DELETE FROM todos WHERE id = ? AND user_id = ?`)
+    deleteTodo.run(id, userId)
+    
+    res.send({ message: "Todo deleted" })
 })
 
 export default router
